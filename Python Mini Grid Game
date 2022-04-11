@@ -1,0 +1,176 @@
+import math
+import turtle
+import turtle as tr
+
+wn = tr.Screen()
+wn.bgcolor("black")
+wn.title("Amogus")
+wn.setup(700, 700)
+
+
+# create pen
+
+class Pen(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("white")
+        self.penup()
+        self.speed(0)
+
+
+class Player(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("blue")
+        self.penup()
+        self.speed(0)
+        self.gold = 0
+
+    def go_up(self):
+        move_x=player.xcor()
+        move_y=player.ycor() +24
+        #check if the space is  a wall
+        if(move_x,move_y) not in walls:
+            self.goto(self.xcor(), self.ycor() + 24)
+
+    def go_down(self):
+        move_x = player.xcor()
+        move_y = player.ycor() - 24
+        # check if the space is  a wall
+        if (move_x, move_y) not in walls:
+            self.goto(self.xcor(), self.ycor() - 24)
+
+    def go_left(self):
+        move_x = player.xcor()-24
+        move_y = player.ycor()
+        # check if the space is  a wall
+        if (move_x, move_y) not in walls:
+            self.goto(self.xcor() - 24, self.ycor())
+
+    def go_right(self):
+        move_x = player.xcor()+24
+        move_y = player.ycor()
+        # check if the space is  a wall
+        if (move_x, move_y) not in walls:
+            self.goto(self.xcor() + 24, self.ycor())
+    def is_collision(self,other):
+        a=self.xcor()-other.xcor()
+        b=self.ycor()-other.ycor()
+        distance = math.sqrt((a ** 2) + (b ** 2))
+        if distance < 5:
+            return True
+        else:
+            return False
+    def destroy(self):
+        self.goto(2000,2000)
+        self.hideturtle()
+        print("Good Game!")
+
+class Treasure(turtle.Turtle):
+    def __init__(self,x,y):
+        turtle.Turtle.__init__(self)
+        self.shape("circle")
+        self.color("gold")
+        self.penup()
+        self.speed(0)
+        self.gold = 100
+        self.goto(x,y)
+    def destroy(self):
+        self.goto(2000,2000)
+        self.hideturtle()
+
+
+#add treasure list
+treasures=[]
+# create levels list
+levels = [""]
+
+# define first level
+level_1 = [
+    "XXXXXXXXXXXXXXXXXXXXXXX",
+    "XP XXXXXXXXXX    TXXXXX",
+    "X  XXXXXXXXXX  XXXXXXXX",
+    "X  XXXXXXXXXX  XXXXXXXX",
+    "X  XXXXXXXX    XXXXXXXX",
+    "X  XXXXXXXX  XXXXXXXXXX",
+    "X       XXX           X",
+    "XXXXXX  XXXXXXXXX  XXXX",
+    "XXXXXX  XXXXXXXXX  XXXX",
+    "X       XXXXXXXXX  XXXX",
+    "X       XX  XX      XXX",
+    "X    XXXX  XXXXXX   XXX",
+    "X   XXX    XXXXXX  XXXX",
+    "X   XXX XXXX       XXXX",
+    "X  XXXX XXXXXXXXX  XXXX",
+    "X  XXX   XXXXT XX  XXXX",
+    "X  XXXXX XXXX  XX   XXX",
+    "X   T XX XXXX  XX  XXXX",
+    "X   XXXX XXX   XXX   XX",
+    "X   XXXX XXX   XXX    X",
+    "X                     X",
+    "XXXXXXXXXXXXXXXXXXXXXXX",
+]
+# Add maze to mazes list
+levels.append(level_1)
+
+
+# Create level setup funcion
+def setup_maze(level):
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            # get character at x,y coordinate
+            character = level[y][x]
+            # calculate the screen x,y coordinates
+            screen_x = -288 + (x * 24)
+            screen_y = 288 - (y * 24)
+
+            # check if it is an x(wall)
+            if character == "X":
+                pen.goto(screen_x, screen_y)
+                pen.stamp()
+                #add walls to list
+                walls.append((screen_x,screen_y))
+            # put player on p
+            if character == "P":
+                player.goto(screen_x, screen_y)
+            #check if is a T
+            if character =="T":
+                treasures.append(Treasure(screen_x,screen_y))
+
+
+
+# create player
+player = Player()
+# create class instances
+pen = Pen()
+#create wall coodinate list
+walls=[]
+# set up the level
+setup_maze(levels[1])
+#Keyboard binding
+tr.listen()
+tr.onkey(player.go_left,"Left")
+tr.onkey(player.go_right,"Right")
+tr.onkey(player.go_up,"Up")
+tr.onkey(player.go_down,"Down")
+#Turn off screen updates
+wn.tracer(0)
+print("Collect at least 200 Gold to win the game!")
+# main game loop
+while True:
+    for treasure in treasures:
+        if player.is_collision(treasure):
+            player.gold += treasure.gold
+            print("Player gold: {}".format(player.gold))
+            #destroy the treasure
+            treasure.destroy()
+            #remove treasure from treasures list
+            treasures.remove(treasure)
+            if player.gold == 200:
+                player.destroy()
+
+    #update screen
+    wn.update()
+ 
